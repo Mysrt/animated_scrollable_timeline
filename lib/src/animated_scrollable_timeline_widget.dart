@@ -125,49 +125,64 @@ class _AnimatedScrollableTimelineWidgetState
     super.dispose();
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
     final double pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    return SizedBox.expand(
-      child: GestureDetector(
-        onHorizontalDragUpdate: horizontalDragHandle,
-        onHorizontalDragStart: stopAnimate,
-        onHorizontalDragEnd: startAnimate,
-        child: Stack(
-          fit: StackFit.passthrough,
-          children: [
-            AnimatedBuilder(
-              animation: animation,
-              builder: (context, child) {
-                return RepaintBoundary(
+    return LayoutBuilder(builder: (context, constraints) {
+      final w = constraints.maxWidth;
+      // Bail out if width is infinite or zero during resize
+      if (w.isInfinite || w <= 0) {
+        return const SizedBox.shrink();
+      }
+      // Otherwise, pin its own tree to that finite width/height:
+      return SizedBox(
+        width: constraints.maxWidth,
+        height: constraints.maxHeight,
+        child: SizedBox.expand(
+          child: GestureDetector(
+            onHorizontalDragUpdate: horizontalDragHandle,
+            onHorizontalDragStart: stopAnimate,
+            onHorizontalDragEnd: startAnimate,
+            child: Stack(
+              fit: StackFit.passthrough,
+              children: [
+                AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    return RepaintBoundary(
+                      child: CustomPaint(
+                        isComplex: true,
+                        painter: TimelinePainter.general(
+                          repaint: controller,
+                          dateFormat: widget.dateFormat,
+                          largeDivisionHeight: widget.largeDivisionHeight,
+                          smallDivisionHeight: widget.smallDivisionHeight,
+                          devicePixelRatio: pixelRatio,
+                          dividersAmount: widget.dividersAmount,
+                          dividerWidth: widget.dividerWidth,
+                          divisionGap: widget.divisionGap,
+                          gapDuration: widget.gapDuration,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                RepaintBoundary(
                   child: CustomPaint(
-                    isComplex: true,
-                    painter: TimelinePainter.general(
-                      repaint: controller,
-                      dateFormat: widget.dateFormat,
-                      largeDivisionHeight: widget.largeDivisionHeight,
-                      smallDivisionHeight: widget.smallDivisionHeight,
-                      devicePixelRatio: pixelRatio,
-                      dividersAmount: widget.dividersAmount,
-                      dividerWidth: widget.dividerWidth,
-                      divisionGap: widget.divisionGap,
-                      gapDuration: widget.gapDuration,
-                    ),
+                    painter: PastPartPainter.general(),
+                    willChange: false,
+                    isComplex: false,
                   ),
-                );
-              },
+                ),
+              ],
             ),
-            RepaintBoundary(
-              child: CustomPaint(
-                painter: PastPartPainter.general(),
-                willChange: false,
-                isComplex: false,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   void animationListener() {} // ! wtf?
