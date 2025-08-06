@@ -59,8 +59,9 @@ class AnimatedTimeline extends StatefulWidget {
   State<AnimatedTimeline> createState() => _AnimatedTimelineState();
 }
 
+
 class _AnimatedTimelineState extends State<AnimatedTimeline>
-    with SingleTickerProviderStateMixin {
+  with TickerProviderStateMixin {
   late AnimationController controller;
 
   @override
