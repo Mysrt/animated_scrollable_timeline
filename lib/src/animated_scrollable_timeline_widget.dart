@@ -86,7 +86,7 @@ class AnimatedScrollableTimelineWidget extends StatefulWidget {
 
 class _AnimatedScrollableTimelineWidgetState
     extends State<AnimatedScrollableTimelineWidget>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late Timer timer;
   late Animation animation;
   late AnimationController controller;
